@@ -1,10 +1,10 @@
-
 #!/usr/bin/env bash
 set -e
 
 ISO_NAME=$1
 ROOTFS=rootfs
 ISO_DIR=iso
+OUTPUT="$(pwd)/${ISO_NAME}"
 
 sudo rm -rf "$ISO_DIR"
 mkdir -p "$ISO_DIR"/{boot/grub,live}
@@ -31,7 +31,10 @@ menuentry "Minimal Debian Live" {
 }
 EOF
 
+# Ensure output directory exists
+sudo mkdir -p "$(dirname "$OUTPUT")"
+
 # Create hybrid ISO (BIOS + UEFI)
 sudo grub-mkrescue \
-  -o "$ISO_NAME" \
+  -o "$OUTPUT" \
   "$ISO_DIR"
