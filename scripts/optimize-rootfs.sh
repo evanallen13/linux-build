@@ -3,9 +3,26 @@ set -e
 
 ROOTFS=rootfs
 
-sudo chroot $ROOTFS /bin/bash <<'EOF'
+# Required mounts for kernel install
+sudo mount --bind /dev  "$ROOTFS/dev"
+sudo mount --bind /dev/pts "$ROOTFS/dev/pts"
+sudo mount --bind /proc "$ROOTFS/proc"
+sudo mount --bind /sys  "$ROOTFS/sys"
+
+sudo chroot "$ROOTFS" /bin/bash <<'EOF'
 set -e
 
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update
+
+# REQUIRED for booting
+apt-get install -y \
+  linux-image-amd64 \
+  live-boot \
+  systemd-sysv
+
+# Size optimization
 apt-get purge -y \
   man-db \
   info \
@@ -28,3 +45,9 @@ rm -rf \
   /usr/share/locale/* \
   /var/lib/apt/lists/*
 EOF
+
+# Cleanup mounts
+sudo umount "$ROOTFS/dev/pts"
+sudo umount "$ROOTFS/dev"
+sudo umount "$ROOTFS/proc"
+sudo umount "$ROOTFS/sys"
