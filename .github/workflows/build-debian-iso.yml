@@ -48,15 +48,20 @@ jobs:
         run: |
           sudo ./scripts/make-iso.sh "${ISO_NAME}"
 
-      - name: Upload ISO artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: debian-iso
-          path: ${{ env.ISO_NAME }}
+      - name: Verify ISO exists
+        run: |
+          pwd
+          ls -lh
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ env.ISO_NAME }}
-          name: Debian Minimal ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
+      # - name: Upload ISO artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: debian-iso
+      #     path: ${{ env.ISO_NAME }}
+
+      # - name: Create GitHub Release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     files: ${{ env.ISO_NAME }}
+      #     name: Debian Minimal ${{ github.ref_name }}
+      #     tag_name: ${{ github.ref_name }}
