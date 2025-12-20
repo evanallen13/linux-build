@@ -37,4 +37,4 @@ sudo mkdir -p "$(dirname "$OUTPUT")"
 # Create hybrid ISO (BIOS + UEFI)
 sudo grub-mkrescue \
   -o "$OUTPUT" \
-  "$ISO_DIR"
+  "$ISO_DIR" || true
