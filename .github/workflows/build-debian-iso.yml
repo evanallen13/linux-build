@@ -1,10 +1,10 @@
 name: Build Minimal Debian ISO
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,8 +18,7 @@ jobs:
       ISO_NAME: debian-minimal-custom.iso
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install build dependencies
         run: |
@@ -27,22 +26,25 @@ jobs:
           sudo apt install -y \
             debootstrap \
             squashfs-tools \
-            xorriso \
             grub-pc-bin \
             grub-efi-amd64-bin \
-            mtools \
-            dosfstools
+            grub-common \
+            xorriso
 
-      - name: Build Debian root filesystem
+      - name: Build root filesystem
         run: |
           chmod +x scripts/*.sh
           sudo ./scripts/build-rootfs.sh
 
-      - name: Optimize root filesystem for size
+      - name: Optimize root filesystem
         run: |
           sudo ./scripts/optimize-rootfs.sh
 
-      - name: Create bootable ISO
+      - name: Verify kernel exists
+        run: |
+          ls -lh rootfs/boot
+
+      - name: Build bootable ISO
         run: |
           sudo ./scripts/make-iso.sh "${ISO_NAME}"
 
@@ -56,10 +58,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ env.ISO_NAME }}
-          name: Debian Minimal Release ${{ github.ref_name }}
+          name: Debian Minimal ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
-          body: |
-            Minimal Debian ISO optimized for size.
-            - Base: Debian ${{ env.DEBIAN_RELEASE }}
-            - Built via GitHub Actions
-            - SquashFS compressed
