@@ -52,12 +52,13 @@ jobs:
         run: |
           pwd
           ls -lh
+          ls -lh iso/
 
-      # - name: Upload ISO artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: debian-iso
-      #     path: ${{ env.ISO_NAME }}
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-iso
+          path: iso/${{ env.ISO_NAME }}
 
       # - name: Create GitHub Release
       #   uses: softprops/action-gh-release@v2
