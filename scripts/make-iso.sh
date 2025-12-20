@@ -8,25 +8,25 @@ ROOTFS=rootfs
 sudo rm -rf $WORKDIR
 mkdir -p $WORKDIR/{boot/grub,live}
 
+# Squash rootfs
 sudo mksquashfs $ROOTFS $WORKDIR/live/filesystem.squashfs -comp xz -e boot
 
+# Minimal GRUB config
 cat <<EOF | sudo tee $WORKDIR/boot/grub/grub.cfg
 set default=0
 set timeout=3
 
 menuentry "Minimal Debian" {
-    linux /boot/vmlinuz boot=live quiet
-    initrd /boot/initrd.img
+    linux /vmlinuz boot=live quiet
+    initrd /initrd.img
 }
 EOF
 
-sudo xorriso -as mkisofs \
-  -iso-level 3 \
-  -o $ISO_NAME \
-  -full-iso9660-filenames \
-  -volid "DEBIAN_MINIMAL" \
-  -eltorito-boot boot/grub/i386-pc/eltorito.img \
-  -no-emul-boot \
-  -boot-load-size 4 \
-  -boot-info-table \
-  $WORKDIR
+# Copy kernel + initrd from rootfs
+sudo cp $ROOTFS/boot/vmlinuz-* $WORKDIR/vmlinuz
+sudo cp $ROOTFS/boot/initrd.img-* $WORKDIR/initrd.img
+
+# Create hybrid ISO (BIOS + UEFI)
+sudo grub-mkrescue \
+  -o "$ISO_NAME" \
+  "$WORKDIR"
