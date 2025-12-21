@@ -22,14 +22,16 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          sudo apt update
-          sudo apt install -y \
-            debootstrap \
-            squashfs-tools \
-            grub-pc-bin \
-            grub-efi-amd64-bin \
-            grub-common \
-            xorriso
+         sudo apt update
+         sudo apt install -y \
+          debootstrap \
+          squashfs-tools \
+          grub-pc-bin \
+          grub-efi-amd64-bin \
+          grub-common \
+          xorriso \
+          dosfstools \
+          mtools
 
       - name: Build root filesystem
         run: |
