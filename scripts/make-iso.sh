@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 set -e
 
-ISO_NAME=$1
-ROOTFS=rootfs
-ISO_DIR=iso
-OUTPUT="$(pwd)/${ISO_NAME}"
+ISO_NAME="$1"
+ROOTFS="rootfs"
+ISO_DIR="iso"
+WORKSPACE="$(pwd)"
+OUTPUT="$WORKSPACE/$ISO_NAME"
 
 sudo rm -rf "$ISO_DIR"
 mkdir -p "$ISO_DIR"/{boot/grub,live}
 
-# Create SquashFS
+# SquashFS
 sudo mksquashfs \
   "$ROOTFS" \
   "$ISO_DIR/live/filesystem.squashfs" \
   -comp xz \
   -e boot
 
-# Copy kernel + initrd
+# Kernel + initrd
 sudo cp "$ROOTFS"/boot/vmlinuz-* "$ISO_DIR/vmlinuz"
 sudo cp "$ROOTFS"/boot/initrd.img-* "$ISO_DIR/initrd.img"
 
@@ -31,10 +32,11 @@ menuentry "Minimal Debian Live" {
 }
 EOF
 
-# Ensure output directory exists
-sudo mkdir -p "$(dirname "$OUTPUT")"
+# 🔑 CRITICAL PART: run grub-mkrescue *from workspace*
+sudo bash -c "
+  cd '$WORKSPACE' &&
+  grub-mkrescue -o '$OUTPUT' '$ISO_DIR'
+" || true
 
-# Create hybrid ISO (BIOS + UEFI)
-sudo grub-mkrescue \
-  -o "$OUTPUT" \
-  "$ISO_DIR" || true
+# Fix ownership so runner can upload it
+sudo chown "$USER:$USER" "$OUTPUT"
